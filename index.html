@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Silence Tools</title>
+<style>
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#0f0f14;color:#eaeaf0;display:flex;height:100vh}
+nav{width:220px;background:#151522;padding:10px;box-sizing:border-box}
+nav h1{font-size:18px;margin:10px 0}
+nav button,nav a{width:100%;margin:4px 0;padding:8px;border:none;border-radius:6px;background:#22223a;color:#fff;cursor:pointer;text-align:left}
+nav button.active{background:#3a3aff}
+main{flex:1;padding:16px;overflow:auto}
+section{display:none}
+section.active{display:block}
+textarea,input,select{width:100%;box-sizing:border-box;margin:6px 0;padding:8px;border-radius:6px;border:none;background:#1c1c2b;color:#fff}
+button.action{margin-top:6px;padding:8px 12px;border:none;border-radius:6px;background:#3a3aff;color:#fff;cursor:pointer}
+.lang{display:flex;gap:6px;margin-top:10px}
+.lang button{flex:1}
+footer{opacity:.6;margin-top:20px;font-size:12px}
+</style>
+</head>
+<body>
+<nav>
+<h1>Silence Tools</h1>
+<button class="tab active" data-tab="code" data-i18n="navCode">Код</button>
+<button class="tab" data-tab="timer" data-i18n="navTimer">Таймер</button>
+<button class="tab" data-tab="wheel" data-i18n="navWheel">Барабан</button>
+<button class="tab" data-tab="notes" data-i18n="navNotes">Заметки</button>
+<a href="https://s1lenc3ind4rk.github.io/IndexMaker/" target="_blank" data-i18n="navIndex">IndexMaker</a>
+<a href="https://github.com/S1LENC3inD4RK" target="_blank" data-i18n="navGit">GitHub</a>
+<div class="lang">
+<button onclick="setLang('ru')">RU</button>
+<button onclick="setLang('en')">EN</button>
+</div>
+</nav>
+<main>
+<section id="code" class="active">
+<h2 data-i18n="codeGen">Генератор кода</h2>
+<select id="codeType">
+<option value="js">JavaScript</option>
+<option value="html">HTML</option>
+<option value="css">CSS</option>
+</select>
+<button class="action" onclick="genCode()" data-i18n="gen">Сгенерировать</button>
+<textarea id="codeOut" style="height:220px"></textarea>
+</section>
+
+<section id="timer">
+<h2 data-i18n="timer">Таймер</h2>
+<input id="timerInput" type="number" placeholder="Секунды">
+<button class="action" onclick="startTimer()" data-i18n="start">Старт</button>
+<div id="timerOut"></div>
+</section>
+
+<section id="wheel">
+<h2 data-i18n="wheel">Барабан</h2>
+<textarea id="wheelInput" placeholder="Один вариант = одна строка"></textarea>
+<button class="action" onclick="spinWheel()" data-i18n="spin">Крутить</button>
+<div id="wheelResult" style="margin-top:12px;font-size:18px"></div>
+</section>
+
+<section id="notes">
+<h2 data-i18n="notes">Заметки</h2>
+<textarea id="notesArea" style="height:200px"></textarea>
+<button class="action" onclick="saveNotes()" data-i18n="save">Сохранить</button>
+</section>
+
+<footer>(c) SilentInDark</footer>
+</main>
+
+<script>
+const tabs=document.querySelectorAll('.tab');
+const sections=document.querySelectorAll('section');
+
+tabs.forEach(b=>b.onclick=()=>{
+ tabs.forEach(x=>x.classList.remove('active'));
+ b.classList.add('active');
+ sections.forEach(s=>s.classList.remove('active'));
+ document.getElementById(b.dataset.tab).classList.add('active');
+});
+
+function genCode(){
+ const t=codeType.value;
+ if(t==='js'){
+  codeOut.value=`function random(min,max){\n return Math.floor(Math.random()*(max-min+1))+min;\n}\n\nconsole.log(random(1,100));`;
+ }else if(t==='html'){
+  codeOut.value=`<!DOCTYPE html>\n<html>\n<body>\n<h1>Hello World</h1>\n</body>\n</html>`;
+ }else{
+  codeOut.value=`body{\n background:#111;\n color:#eee;\n font-family:sans-serif;\n}`;
+ }
+}
+
+function spinWheel(){
+ const items = wheelInput.value.split('\n').filter(x=>x.trim());
+ if(!items.length){wheelResult.textContent='—';return;}
+ const win = items[Math.floor(Math.random()*items.length)];
+ wheelResult.textContent = win;
+}
+
+let tInt;
+function startTimer(){
+ let t=Number(timerInput.value)||0;
+ timerOut.textContent=t;
+ clearInterval(tInt);
+ tInt=setInterval(()=>{
+  t--; timerOut.textContent=t;
+  if(t<=0) clearInterval(tInt);
+ },1000);
+}
+
+function saveNotes(){localStorage.setItem('notes',notesArea.value)}
+function loadNotes(){notesArea.value=localStorage.getItem('notes')||''}
+loadNotes();
+
+const dict={
+ru:{navCode:'Код',navTimer:'Таймер',navWheel:'Барабан',navNotes:'Заметки',navIndex:'IndexMaker',navGit:'GitHub',codeGen:'Генератор кода',gen:'Сгенерировать',timer:'Таймер',start:'Старт',wheel:'Барабан',spin:'Крутить',notes:'Заметки',save:'Сохранить'},
+en:{navCode:'Code',navTimer:'Timer',navWheel:'Wheel',navNotes:'Notes',navIndex:'IndexMaker',navGit:'GitHub',codeGen:'Code generator',gen:'Generate',timer:'Timer',start:'Start',wheel:'Wheel',spin:'Spin',notes:'Notes',save:'Save'}
+};
+
+function setLang(l){
+ document.querySelectorAll('[data-i18n]').forEach(el=>{
+  el.textContent=dict[l][el.dataset.i18n];
+ });
+ document.documentElement.lang=l;
+}
+</script>
+</body>
+</html>
